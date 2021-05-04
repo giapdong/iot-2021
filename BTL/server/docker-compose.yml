@@ -9,6 +9,9 @@ services:
       - 8883:8883
       - 9001:9001
     restart: unless-stopped
+    # Ignore in production
+    logging:
+      driver: none 
 
   core-server:
     build: .

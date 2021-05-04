@@ -17,9 +17,11 @@ function genName() {
 }
 
 router.post('/in', async (req, res) => {
-  const socket = req.refsocket
-
   const { number, type, time } = req.body
+  const socket = req.refsocket
+  const userInDB = await User.findOne({ 'car.plate': number }).exec()
+  console.log(userInDB.toString())
+
   const user = {
     name: genName(),
     position: genPosition(),

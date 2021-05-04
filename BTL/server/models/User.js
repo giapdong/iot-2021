@@ -5,9 +5,6 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String
     },
-    position: {
-      type: String
-    },
     car: {
       plate: {
         type: String,
@@ -17,12 +14,54 @@ const userSchema = new mongoose.Schema(
         type: String
       }
     },
+    history: [
+      {
+        parking: {
+          type: String
+        },
+        position: {
+          type: String
+        },
+        checkIn: {
+          time: {
+            type: Date
+          },
+          image: {
+            type: String
+          }
+        },
+        checkOut: {
+          time: {
+            type: Date
+          },
+          image: {
+            type: String
+          }
+        }
+      }
+    ],
     sessions: {
+      parking: {
+        type: String
+      },
+      position: {
+        type: String
+      },
       checkIn: {
-        type: Date
+        time: {
+          type: Date
+        },
+        image: {
+          type: String
+        }
       },
       checkOut: {
-        type: Date
+        time: {
+          type: Date
+        },
+        image: {
+          type: String
+        }
       }
     }
   },

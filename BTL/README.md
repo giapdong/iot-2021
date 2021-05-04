@@ -1,5 +1,13 @@
 # IoT project group 20
 
-## Server enviroment
-  - MONGO_URI=mongodb+srv://khanhk62hust:1@cluster0.xptvo.mongodb.net/iot?retryWrites=true&w=majority
-  - PORT=9000
+## Prune docker enviroment
+
+```
+docker network prune -f && docker image prune -f && docker container prune -f
+```
+
+
+## Run
+```
+docker-compose up --build
+```

@@ -1,5 +1,15 @@
-version: "3"
+version: '3'
 services:
+  mqtt-broker:
+    image: eclipse-mosquitto:1.6
+    expose:
+      - 1883
+    ports:
+      - 1883:1883
+      - 8883:8883
+      - 9001:9001
+    restart: unless-stopped
   python-demo:
     build: .
-    network_mode: host
+    depends_on:
+      - mqtt-broker

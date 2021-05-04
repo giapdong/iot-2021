@@ -1,5 +1,9 @@
 import requests
 
+import eclipse_subscriber as subscriber
+# from eclipse_subscriber import * as subscriber
+# from mqtt_publisher import publisher
+
 def sentResult():
     data = {'type': 'in', 'number': '51F57493', 'time': '1620055805360'}
     #url = 'http://localhost:9000/admin/add'
@@ -19,5 +23,9 @@ def echoPostAPI():
     res = requests.post(url, data)
     print(res.text)
 
+def main():
+    print("Main function")
+    subscriber.subscribe()
+
 if __name__ == '__main__':
-    sentResult()
+    main()

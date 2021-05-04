@@ -23,7 +23,7 @@ def detect(myNetwork, plateDetector, file_name):
                 
     return ''
 
-def sendCarIn(data):
+def sendInfoCarToServer(data):
     url = 'http://host.docker.internal:9000/user/in'
     print("Send to ", url , "data: ", data)
     res = requests.post(url, data)
@@ -74,7 +74,7 @@ def main():
                 'time': session_time,
                 'number': plate_number
             }
-            sendCarIn(data = detect_data)
+            sendInfoCarToServer(data = detect_data)
         else:
             print('Cannot detect plate number in ' + file_name)
 

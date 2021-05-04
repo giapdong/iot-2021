@@ -9,6 +9,7 @@ import requests
 import cv2
 from class_CNN import NeuralNetwork
 from class_PlateDetection import PlateDetector
+import mqttConnector as publisher
 
 def detect(myNetwork, plateDetector, file_name):
     img = cv2.imread(file_name)
@@ -22,13 +23,6 @@ def detect(myNetwork, plateDetector, file_name):
             return recognized_plate
                 
     return ''
-
-def sendInfoCarToServer(data):
-    url = 'http://host.docker.internal:9000/user/in'
-    print("Send to ", url , "data: ", data)
-    res = requests.post(url, data)
-    print("Sent to main server")
-    print(res.text)
 
 def main():
     BROKER_HOST = 'rabbitmq'
@@ -72,9 +66,10 @@ def main():
             detect_data = {
                 'type': session_type,
                 'time': session_time,
-                'number': plate_number
+                'number': plate_number,
+                'base64': image_str
             }
-            sendInfoCarToServer(data = detect_data)
+            publisher.publish(data = detect_data)
         else:
             print('Cannot detect plate number in ' + file_name)
 

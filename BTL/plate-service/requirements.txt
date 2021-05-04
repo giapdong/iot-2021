@@ -3,3 +3,4 @@ imutils==0.5.3
 scikit-image==0.15.0
 pika==1.2.0
 requests==2.25.1
+paho-mqtt==1.5.1

@@ -6,7 +6,7 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe("topic/giapdongtestabcdk232")
+    client.subscribe("iot20202/parking-01")
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
@@ -19,7 +19,7 @@ def subscribe():
     client.on_message = on_message
 
     # client.connect("localhost", 1883, 10)
-    client.connect("host.docker.internal", 1883, 10)
+    client.connect("broker.hivemq.com", 1883, 10)
 
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.

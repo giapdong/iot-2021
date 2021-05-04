@@ -9,7 +9,7 @@ services:
       - "5672:5672"
       - "15672:15672"
   plate-service:
-    build: ./plate-service
+    build: .
     depends_on:
       - rabbitmq
     restart: on-failure

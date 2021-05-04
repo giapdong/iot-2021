@@ -1,6 +1,12 @@
+const mongoose = require('mongoose')
+const cors = require('cors')
+
 const express = require('express')
 const socketio = require('socket.io')
-const mongoose = require('mongoose')
+
+const mqtt = require('mqtt')
+const mqttClient = mqtt.connect('mqtt://host.docker.internal:1883')
+const TOPIC = 'iot20202/parking-01'
 
 require('dotenv').config()
 
@@ -14,7 +20,7 @@ const app = express()
 const server = require('http').Server(app)
 const io = socketio(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'http://host.docker.internal:3000',
     methods: ['GET', 'POST']
   }
 })
@@ -22,6 +28,10 @@ const io = socketio(server, {
 server.listen(process.env.PORT)
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
+app.use(cors())
+app.get('/test', (req, res) => {
+  res.send('Hello, test api!')
+})
 
 // middleware
 io.of('/').on('connect', (socket) => {
@@ -34,3 +44,18 @@ const socketMiddleware = (socket) => (req, res, next) => {
   req.refsocket = socket
   next()
 }
+
+mqttClient.on('connect', function () {
+  mqttClient.subscribe(TOPIC, function (err) {
+    if (err) {
+      console.log('Error when connect to MQTT Broker', err)
+    } else {
+      console.log('Connected to MQTT Broker')
+    }
+  })
+})
+
+mqttClient.on('message', function (topic, message) {
+  // message is Buffer
+  console.log(message.toString())
+})

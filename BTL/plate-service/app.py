@@ -9,7 +9,30 @@ import requests
 import cv2
 from class_CNN import NeuralNetwork
 from class_PlateDetection import PlateDetector
-import mqttConnector as publisher
+
+import paho.mqtt.client as mqtt
+host = "broker.hivemq.com"
+topic = "iot20202/parking-01"
+client = mqtt.Client()
+client.connect(host, 1883, 60)
+
+# Load pretrained model
+########### INIT ###########
+# Initialize the plate detector
+plateDetector = PlateDetector(type_of_plate='RECT_PLATE',
+                                        minPlateArea=4500,
+                                        maxPlateArea=30000)
+
+# Initialize the Neural Network
+myNetwork = NeuralNetwork(modelFile="model/binary_128_0.50_ver3.pb",
+                            labelFile="model/binary_128_0.50_labels_ver2.txt")
+
+def publish(data):
+    summary = {'type': data['type'], 'number': data['number'], 'time': data['time']}
+    print("Publish => '", host, "' with topic: '", topic, "' summary: ", json.dumps(summary))
+
+    payload = json.dumps(data)
+    client.publish(topic, payload)
 
 def detect(myNetwork, plateDetector, file_name):
     img = cv2.imread(file_name)
@@ -24,6 +47,31 @@ def detect(myNetwork, plateDetector, file_name):
                 
     return ''
 
+def callback(ch, method, properties, body):
+    data = json.loads(body.decode('utf-8'))
+    session_type = data['type']
+    session_time = data['time']
+    image_str = data['image']
+    jpg_original = base64.b64decode(image_str)
+    
+    uploaded_count = len(os.listdir('uploads'))
+    file_name = 'uploads/' + str(uploaded_count + 1) + '.jpg'
+
+    with open(file_name, 'wb') as f_output:
+        f_output.write(jpg_original)
+
+    plate_number = detect(myNetwork, plateDetector, file_name)
+    if plate_number != '':
+        detect_data = {
+            'type': session_type,
+            'time': session_time,
+            'number': plate_number,
+            'base64': image_str
+        }
+        publish(data = detect_data)
+    else:
+        print('Cannot detect plate number in ' + file_name)
+
 def main():
     BROKER_HOST = 'rabbitmq'
     BROKER_USERNAME = 'guest'
@@ -33,46 +81,9 @@ def main():
 
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=BROKER_HOST, port=BROKER_PORT, credentials=pika.credentials.PlainCredentials(BROKER_USERNAME, BROKER_PASSWORD)))
     print("Plate service connected to RabitMQ")
-    # Load pretrained model
-    ########### INIT ###########
-    # Initialize the plate detector
-    plateDetector = PlateDetector(type_of_plate='RECT_PLATE',
-                                            minPlateArea=4500,
-                                            maxPlateArea=30000)
-
-    # Initialize the Neural Network
-    myNetwork = NeuralNetwork(modelFile="model/binary_128_0.50_ver3.pb",
-                                labelFile="model/binary_128_0.50_labels_ver2.txt")
 
     channel = connection.channel()
-
     channel.queue_declare(queue=BROKER_QUEUE, durable=True, auto_delete=False)
-
-    def callback(ch, method, properties, body):
-        data = json.loads(body.decode('utf-8'))
-        session_type = data['type']
-        session_time = data['time']
-        image_str = data['image']
-        jpg_original = base64.b64decode(image_str)
-        
-        uploaded_count = len(os.listdir('uploads'))
-        file_name = 'uploads/' + str(uploaded_count + 1) + '.jpg'
-
-        with open(file_name, 'wb') as f_output:
-            f_output.write(jpg_original)
-
-        plate_number = detect(myNetwork, plateDetector, file_name)
-        if plate_number != '':
-            detect_data = {
-                'type': session_type,
-                'time': session_time,
-                'number': plate_number,
-                'base64': image_str
-            }
-            publisher.publish(data = detect_data)
-        else:
-            print('Cannot detect plate number in ' + file_name)
-
     channel.basic_consume(queue=BROKER_QUEUE, on_message_callback=callback, auto_ack=True)
 
     print(' [*] Waiting for messages. To exit press CTRL+C')

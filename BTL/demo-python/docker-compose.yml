@@ -1,0 +1,5 @@
+version: "3"
+services:
+  python-demo:
+    build: .
+    network_mode: host

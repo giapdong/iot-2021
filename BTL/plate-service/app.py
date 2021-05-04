@@ -10,11 +10,7 @@ import cv2
 from class_CNN import NeuralNetwork
 from class_PlateDetection import PlateDetector
 
-import paho.mqtt.client as mqtt
-host = "broker.hivemq.com"
-topic = "iot20202/parking-01"
-client = mqtt.Client()
-client.connect(host, 1883, 60)
+import mqtt_publisher as publisher
 
 # Load pretrained model
 ########### INIT ###########
@@ -26,13 +22,6 @@ plateDetector = PlateDetector(type_of_plate='RECT_PLATE',
 # Initialize the Neural Network
 myNetwork = NeuralNetwork(modelFile="model/binary_128_0.50_ver3.pb",
                             labelFile="model/binary_128_0.50_labels_ver2.txt")
-
-def publish(data):
-    summary = {'type': data['type'], 'number': data['number'], 'time': data['time']}
-    print("Publish => '", host, "' with topic: '", topic, "' summary: ", json.dumps(summary))
-
-    payload = json.dumps(data)
-    client.publish(topic, payload)
 
 def detect(myNetwork, plateDetector, file_name):
     img = cv2.imread(file_name)
@@ -68,7 +57,8 @@ def callback(ch, method, properties, body):
             'number': plate_number,
             'base64': image_str
         }
-        publish(data = detect_data)
+        print("Number plate: ", plate_number)
+        publisher.safePublish(data = detect_data)
     else:
         print('Cannot detect plate number in ' + file_name)
 

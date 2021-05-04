@@ -3,13 +3,12 @@ services:
   mqtt-broker-demo:
     image: eclipse-mosquitto:1.6
     expose:
-      - 1883
+      - 1884
     ports:
-      - 1883:1883
-      - 8883:8883
-      - 9001:9001
+      - 1884:1883
+      - 9002:9001
     restart: unless-stopped
   python-demo:
     build: .
     depends_on:
-      - mqtt-broker
+      - mqtt-broker-demo

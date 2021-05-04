@@ -18,8 +18,8 @@ def subscribe():
     client.on_connect = on_connect
     client.on_message = on_message
 
-    # client.connect("localhost", 1883, 10)
-    client.connect("host.docker.internal", 1883, 10)
+    # client.connect("host.docker.internal", 1883, 10)
+    client.connect("broker.hivemq.com", 1883, 10)
 
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.

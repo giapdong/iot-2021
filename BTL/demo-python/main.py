@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 
 import mqtt_subscriber as subscriber
 import mqtt_publisher as publisher
@@ -23,9 +24,14 @@ def echoPostAPI():
     res = requests.post(url, data)
     print(res.text)
 
+def mockPublish():
+    while(True):
+        publisher.safePublish({'type': 'in', 'number': '51F57493', 'time': '1620055805360'})
+        time.sleep(1)
+
 def main():
     print("Main function")
-    subscriber.subscribe()
+    mockPublish()
 
 if __name__ == '__main__':
     main()

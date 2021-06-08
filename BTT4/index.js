@@ -25,32 +25,70 @@ app.get("/test", (req, res) => {
   res.send("Hello, test api!");
 });
 
+/**
+ * Find all devices in database
+ */
 app.get("/devices", async (req, res) => {
-  const devices = await Device.find();
-  res.json(devices);
+  try {
+    const devices = await Device.find();
+    res.json(devices);
+  } catch (error) {
+    res.status(404).send(error);
+  }
 });
 
+/**
+ * Create new device with unique id value
+ */
 app.post("/devices", async (req, res) => {
-  const device = await Device.create(req.body);
-  res.json(device);
+  try {
+    const existDevice = await Device.findOne({ id: req.body.id }).exec();
+    if (existDevice) return res.status(400).send("Exist device");
+
+    const device = await Device.create(req.body);
+    res.json(device);
+  } catch (error) {
+    res.status(404).send(error);
+  }
 });
 
+/**
+ * Get info device match with id value
+ */
 app.get("/device/:id", async (req, res) => {
-  const device = await Device.findOne({ id: req.params.id }).exec();
-  res.json(device);
+  try {
+    const device = await Device.findOne({ id: req.params.id }).exec();
+    res.json(device);
+  } catch (error) {
+    res.json({ message: "Not found device" });
+  }
 });
 
+/**
+ * Update device infomation
+ */
 app.put("/device/:id", async (req, res) => {
-  const device = await Device.findOne({ id: req.params.id }).exec();
-  device.type = req.body.type;
-  device.name = req.body.name;
-  await device.save();
-  res.json(device);
+  try {
+    const device = await Device.findOne({ id: req.params.id }).exec();
+    device.type = req.body.type;
+    device.name = req.body.name;
+    await device.save();
+    res.json(device);
+  } catch (error) {
+    res.status(400).send("Something went wrong!");
+  }
 });
 
+/**
+ * Delete device
+ */
 app.delete("/device/:id", async (req, res) => {
-  const device = await Device.deleteOne({ id: req.params.id }).exec();
-  res.json(device);
+  try {
+    const device = await Device.deleteOne({ id: req.params.id }).exec();
+    res.json(device);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 });
 
 app.listen(process.env.PORT, () => {

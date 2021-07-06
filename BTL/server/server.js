@@ -10,17 +10,17 @@ require('dotenv').config()
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
   .then(() => {
-    console.log('Connected to mongo atlas!')
-    require('./mqtt-subscriber')
-  })
+  console.log('Connected to mongo atlas!')
+  require('./mqtt-subscriber')(io)
+})
 
 // initialize server
 const app = express()
 const server = require('http').Server(app)
 const io = socketio(server, {
   cors: {
-    origin: 'http://host.docker.internal:3000',
-    methods: ['GET', 'POST']
+    origin: true,
+    credentials: true
   }
 })
 

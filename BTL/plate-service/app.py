@@ -36,6 +36,14 @@ def detect(myNetwork, plateDetector, file_name):
                 
     return ''
 
+def sendInfoCarToServer(data):
+    data.base64 = 'ahihi'
+    url = 'http://host.docker.internal:9000/user/in'
+    print("Send to ", url , "data: ", data)
+    # res = requests.post(url, data)
+    # print("Sent to main server")
+    # print(res.text)
+
 def callback(ch, method, properties, body):
     data = json.loads(body.decode('utf-8'))
     session_type = data['type']
@@ -59,6 +67,7 @@ def callback(ch, method, properties, body):
         }
         print("Number plate: ", plate_number)
         publisher.safePublish(data = detect_data)
+        # sendInfoCarToServer(data = detect_data)
     else:
         print('Cannot detect plate number in ' + file_name)
 

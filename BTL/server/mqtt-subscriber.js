@@ -5,6 +5,7 @@ const User = require('./models/User')
 const HOST = 'host.docker.internal'
 const TOPIC = ['iot20202/parking-01', 'iot20202/parking-02']
 const client = mqtt.connect(`mqtt://${HOST}:1883`)
+let refio = null
 
 client.on('connect', function () {
   client.subscribe(TOPIC, function (err) {
@@ -32,14 +33,17 @@ client.on('message', async function (topic, message) {
     // First goto IN
     console.log(`${jsonMessage.parking} - Car ${jsonMessage.number} first IN`)
     handFirstIn(jsonMessage)
+    refio.emit('dataFromServer', jsonMessage)
   } else if (jsonMessage.type == 'in') {
     // Handle car IN
     console.log(`${jsonMessage.parking} - Car ${jsonMessage.number} IN`)
     handleCarIn(userInDB, jsonMessage)
+    refio.emit('dataFromServer', jsonMessage)
   } else if (jsonMessage.type == 'out') {
     // Handle car OUT
     console.log(`${jsonMessage.parking} - Car ${jsonMessage.number} OUT`)
     handleCarOut(userInDB, jsonMessage)
+    refio.emit('dataFromServer', jsonMessage)
   }
 })
 
@@ -100,4 +104,8 @@ function genPosition() {
 
 function genName() {
   return 'z' + Math.random().toString(36).substr(2, 9)
+}
+
+module.exports = (io) => {
+  refio = io
 }
